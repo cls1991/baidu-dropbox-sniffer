@@ -54,6 +54,7 @@ def list_dir(dir_name):
         for a_list in data['list']:
             dlink = get_download_link(a_list['fs_id'])
             if dlink:
+                dlink = dlink.replace('\\', '')
                 result.append(dlink)
 
     return result
@@ -69,11 +70,6 @@ def get_download_link(fs_id):
     curl.setopt(pycurl.USERAGENT, const.USER_AGENT)
     curl.setopt(pycurl.REFERER, const.PAN_REFER_URL)
 
-    """
-    download_ajax_url = 'https://pan.baidu.com/api/download?sign=cVV6FS6PvqcE75Y43cyh%2FHTbuD2sLcrbOld7O8lgs0IdAHEJqluyZw%3D%3D&
-    timestamp=1473685224&fidlist=%5B117518735349252%5D&type=dlink&channel=chunlei&web=1&app_id=250528&
-    bdstoken=e0e895bb3ef7b0cb70899ee66b74e809&logid=MTQ3MzY4NTIyODI1MjAuMTI0ODQ1MTgyMzAxMTU1MTY=&clienttype=0'
-    """
     buffers = StringIO()
     request_dict = {
         'channel': 'chunlei',
@@ -93,7 +89,7 @@ def get_download_link(fs_id):
     body = buffers.getvalue()
     buffers.close()
     curl.close()
-    data = eval(body)
+    data = json.loads(body)
     if data['errno']:
         return None
 
@@ -122,8 +118,3 @@ def save_to_file(d_links, file_name):
     except IOError:
         print('file not exist!')
         exit()
-
-
-if __name__ == '__main__':
-    dlinks = list_dir('/Death Note 1080P')
-    save_to_file(dlinks, 'Death Note 1080P.txt')
